@@ -13,7 +13,8 @@ app.options('*', cors());
 // Middleware
 app.use(express.json());
 app.use(morgan('tiny'));
-app.use(jwtHelper)
+app.use(express.urlencoded({ extended: true }));
+app.use(jwtHelper);
 
 // Routers
 const api = process.env.API_URL;
