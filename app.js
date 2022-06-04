@@ -32,7 +32,7 @@ app.use(`${api}/user`, userRoutes)
 mongoose.connect(process.env.CONNECTION, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    dbName: 'capstone'
+    dbName: process.env.DB_NAME
 })
     .then(() => {
         console.log('Database connected...')
@@ -41,6 +41,6 @@ mongoose.connect(process.env.CONNECTION, {
         console.log(err)
     });
 
-app.listen(3000, () => {
+app.listen(process.env.PORT || 3000, () => {
     console.log("Connected to localhost...")
 });
