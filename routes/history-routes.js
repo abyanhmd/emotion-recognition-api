@@ -59,6 +59,33 @@ router.post('/', uploadOptions.single('audioFile'), (req, res) => {
         })
 });
 
+router.post('/test', uploadOptions.single('audioFile'), (req, res) => {
+    const fileName = req.file.filename;
+    const basePath = `${req.protocol}://${req.get('host')}//uploads/audio/`;
+    const token = req.headers.authorization.split(' ')[1]
+    const email = jwt.decode(token)['email']
+    const username = email.split('@')[0]
+    
+    const emotion = new Emotion({
+        emotion: req.body.emotion,
+        duration: req.body.duration,
+        suggestion: req.body.suggestion,
+        email: username,
+        fileName: fileName,
+        audioFile: `${basePath}${fileName}`
+    });
+    emotion.save()
+        .then((it) => {
+            res.status(201).json(it)
+        })
+        .catch((err) => {
+            res.status(500).json({
+                error: true,
+                message: err
+            })
+        })
+});
+
 router.get('/', async (req, res) => {
     const token = req.headers.authorization.split(' ')[1]
     const email = jwt.decode(token)['email']
