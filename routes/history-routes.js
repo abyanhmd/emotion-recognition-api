@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
             errorMessage = null
         } 
 
-        callback(errorMessage, 'uploads')
+        callback(errorMessage, 'uploads/audio')
     },
     filename: function(req, file, callback) {
         const fileName = file.originalname.split(' ').join('-');
@@ -37,12 +37,13 @@ const uploadOptions = multer({ storage: storage });
 
 router.post('/', uploadOptions.single('audioFile'), (req, res) => {
     const fileName = req.file.filename;
-    const basePath = `${req.protocol}://${req.get('host')}//uploads/`;
+    const basePath = `${req.protocol}://${req.get('host')}//uploads/audio/`;
     const token = req.headers.authorization.split(' ')[1]
     const email = jwt.decode(token)['email']
+    const username = email.split('@')[0]
     
     const emotion = new Emotion({
-        email: email,
+        email: username,
         fileName: fileName,
         audioFile: `${basePath}${fileName}`
     });
@@ -59,7 +60,11 @@ router.post('/', uploadOptions.single('audioFile'), (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-    const emotionHistory = await Emotion.find()
+    const token = req.headers.authorization.split(' ')[1]
+    const email = jwt.decode(token)['email']
+    const username = email.split('@')[0]
+    const query = { email: username };
+    const emotionHistory = await Emotion.find(query);
 
     if(!emotionHistory) {
         res.status(500).json({
@@ -67,7 +72,14 @@ router.get('/', async (req, res) => {
         })
     }
 
-    res.send(emotionHistory)
+    if(emotionHistory != null) {
+        res.send(emotionHistory)
+    } else {
+        res.status(404).json({
+            error: true,
+            message: "No emotion history found."
+        })
+    }
 });
 
 router.get('/:id', async (req, res) => {
